@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    command: --default-authentication-plugin=caching_sha2_password
+    environment:
+      MYSQL_DATABASE: db_moodle
+      MYSQL_USER: usr_moodle
+      MYSQL_PASSWORD: pw_moodle
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d # Monta o diretório de scripts de inicialização
+    # Remove a propriedade init_db
+    # init_db: |
+    #   echo "CREATE USER 'usr_moodle'@'%' IDENTIFIED BY 'pw_moodle';" > /docker-entrypoint-initdb.d/init.sql
+    #   echo "GRANT ALL PRIVILEGES ON db_moodle.* TO 'usr_moodle'@'%';" >> /docker-entrypoint-initdb.d/init.sql
+
+  moodle:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+    volumes:
+      - ./moodle:/var/www/html
+
+volumes:
+  mysql_data:
